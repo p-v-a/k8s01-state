@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    peers:
+    - peer-address: 172.16.31.161
+      peer-asn: 64500
+      my-asn: 64501
+    address-pools:
+    - name: internal
+      protocol: bgp
+      avoid-buggy-ips: true
+      addresses:
+      - 172.16.30.0/25
+    - name: public
+      protocol: bgp
+      avoid-buggy-ips: true
+      addresses:
+      - 172.16.30.240/29
+      auto-assign: false
