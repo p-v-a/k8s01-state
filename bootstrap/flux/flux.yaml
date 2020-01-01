@@ -1,4 +1,9 @@
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -140,7 +145,7 @@ spec:
         # Replace the following URL to change the Git repository used by Flux.
         # HTTP basic auth credentials can be supplied using environment variables:
         # https://$(GIT_AUTHUSER):$(GIT_AUTHKEY)@github.com/user/repository.git
-        - --git-url=gut@github.com:p-v-a/k8s01-state
+        - --git-url=git@github.com:p-v-a/k8s01-state
         - --git-branch=master
         - --git-path=namespaces,workloads
         - --git-label=flux
