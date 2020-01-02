@@ -6,7 +6,7 @@ metadata:
   namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: cert-certs
   namespace: kube-system
@@ -19,7 +19,7 @@ rules:
   verbs: ["list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: cert-certs
   namespace: kube-system
@@ -28,7 +28,7 @@ subjects:
   name: cert-certs
   namespace: "kube-system"
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: cert-certs
   apiGroup: rbac.authorization.k8s.io
 ---
@@ -39,7 +39,6 @@ metadata:
   namespace: kube-system
   labels:
     app: certs
-    chart: certs-1.1.3
     release: cert
 spec:
   template:
@@ -80,7 +79,6 @@ metadata:
   namespace: kube-system
   labels:
     app: certs
-    chart: certs-1.1.3
     release: cert
 spec:
   schedule: "*/5 * * * *"
