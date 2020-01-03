@@ -188,8 +188,21 @@ spec:
         run: haproxy-ingress
     spec:
       hostNetwork: true
+
+      # allow scheduling of haproxy-ingress on control plane nodes
+      tolerations:
+      - key: "node-role.kubernetes.io/controlplane"
+        operator: Equal
+        value: "true"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/etcd"
+        operator: Equal
+        value: "true"
+        effect: "NoExecute"
+
       nodeSelector:
-        role: ingress-controller
+        "node-role.kubernetes.io/controlplane": "true"
+
       serviceAccountName: ingress-controller
       containers:
       - name: haproxy-ingress
