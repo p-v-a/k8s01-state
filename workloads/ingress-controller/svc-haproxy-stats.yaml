@@ -7,9 +7,9 @@ metadata:
 spec:
   ports:
   - name: http
-    port: 80
+    port: 1936
     targetPort: 1936
     protocol: TCP
 
   selector:
-    app: haproxy-ingress
+    run: haproxy-ingress
