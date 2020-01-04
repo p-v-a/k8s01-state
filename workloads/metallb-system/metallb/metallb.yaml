@@ -1,15 +1,7 @@
 # Source: https://raw.githubusercontent.com/google/metallb/v0.7.3/manifests/metallb.yaml
 # NOTE: When updating from source, change names that are namespace:name to be
 # just name otherwise it breaks flux.
-
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: metallb-system
-  labels:
-    app: metallb
 ---
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -166,7 +158,7 @@ spec:
 
       containers:
       - name: speaker
-        image: metallb/speaker:v0.7.3
+        image: metallb/speaker:v0.8.3
         imagePullPolicy: IfNotPresent
         args:
         - --port=7472
