@@ -10,7 +10,7 @@ parameters:
   adminId: admin
   adminSecretName: ceph-secret-admin
   adminSecretNamespace: ceph-provisioner
-  pool: kube
+  pool: ds00-k8s01
   userId: kube
   userSecretName: ceph-secret-k8s01
   userSecretNamespace: ceph-provisioner

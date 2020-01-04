@@ -75,7 +75,7 @@ metadata:
   name: rbd-provisioner
 
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: ceph-provisioner
@@ -96,3 +96,6 @@ spec:
         - name: PROVISIONER_NAME
           value: ceph.com/rbd
       serviceAccount: rbd-provisioner
+  selector:
+    matchLabels:
+      app: rbd-provisioner
