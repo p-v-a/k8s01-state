@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scv-ingress-infra-internal
+  namespace: ingress-controller
+  annotations:
+    metallb.universe.tf/address-pool: internal
+spec:
+  type: LoadBalancer
+  #This will preserve the source IP for external traffic. However it means only nodes with an instance of haproxy-ingress can receive traffic
+#  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  selector:
+    run: haproxy-ingress
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-ingress-infra-public
+  namespace: ingress-controller
+  annotations:
+    metallb.universe.tf/address-pool: public
+spec:
+  type: LoadBalancer
+  #This will preserve the source IP for external traffic. However it means only nodes with an instance of haproxy-ingress can receive traffic
+#  externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  selector:
+    run: haproxy-ingress

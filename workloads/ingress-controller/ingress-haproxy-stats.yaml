@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: haproxy-ingress
+  name: ingress-haproxy-stats
+  annotations:
+    acme.kubernetes.io/enable: "true"
+    acme.kubernetes.io/dns: "dns_gd"
+spec:
+  tls:
+  - hosts:
+    - infra-k8s01.internal.cloudninja.xyz
+    secretName: k8s01-tls
+  rules:
+  - host: infra-k8s01.internal.cloudninja.xyz
+    http:
+      paths:
+      - path: /haproxy/stats
+        backend:
+          serviceName: svc-haproxy-stats
+          servicePort: 80
+
