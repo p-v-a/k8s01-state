@@ -162,12 +162,14 @@ spec:
   - port: 8080
   selector:
     run: ingress-default-backend
+
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: haproxy-ingress
   namespace: ingress-controller
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
