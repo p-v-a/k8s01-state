@@ -6,12 +6,12 @@ metadata:
   namespace: ceph-provisioner
 provisioner: ceph.com/rbd
 parameters:
-  monitors: 172.16.31.68:6789, 172.16.31.69:6789, 172.16.31.70:6789
+  monitors: "172.16.31.68:6789,172.16.31.69:6789,172.16.31.70:6789"
   adminId: admin
   adminSecretName: ceph-secret-admin
   adminSecretNamespace: ceph-provisioner
   pool: ds00-k8s01-gp1
-  userId: kube
+  userId: k8s01
   userSecretName: ceph-secret-k8s01
   userSecretNamespace: ceph-provisioner
   imageFormat: "2"
@@ -25,12 +25,12 @@ metadata:
   namespace: ceph-provisioner
 provisioner: ceph.com/rbd
 parameters:
-  monitors: 172.16.31.68:6789, 172.16.31.69:6789, 172.16.31.70:6789
+  monitors: "172.16.31.68:6789,172.16.31.69:6789,172.16.31.70:6789"
   adminId: admin
   adminSecretName: ceph-secret-admin
   adminSecretNamespace: ceph-provisioner
   pool: ds01-k8s01-io1
-  userId: kube
+  userId: k8s01
   userSecretName: ceph-secret-k8s01
   userSecretNamespace: ceph-provisioner
   imageFormat: "2"

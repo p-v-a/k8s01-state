@@ -1,4 +1,5 @@
 # from https://github.com/ajaynemade/K8s-Ceph/blob/master/Ceph-RBD-Provisioner.yaml
+# Shell we consider using https://github.com/ceph/ceph-csi?
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
