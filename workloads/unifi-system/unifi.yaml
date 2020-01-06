@@ -1,0 +1,203 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: unifi-data
+  namespace: unifi-system
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "10Gi"
+  storageClassName: "gp1"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unifi-controller
+  namespace: unifi-system
+  annotations:
+    metallb.universe.tf/address-pool: internal
+    metallb.universe.tf/allow-shared-ip: unifi-controller
+spec:
+  loadBalancerIP: 172.16.30.2
+  type: LoadBalancer
+  ports:
+    - port: 8080
+      targetPort: controller
+      protocol: TCP
+      name: controller
+
+  selector:
+    name: unifi-controller
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unifi-discovery
+  namespace: unifi-system
+  annotations:
+    metallb.universe.tf/address-pool: internal
+    metallb.universe.tf/allow-shared-ip: unifi-controller
+spec:
+  loadBalancerIP: 172.16.30.2
+  type: LoadBalancer
+  ports:
+    - port: 10001
+      targetPort: discovery
+      protocol: UDP
+      name: discovery
+
+  selector:
+    name: unifi-controller
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unifi-stun
+  namespace: unifi-system
+  annotations:
+    metallb.universe.tf/address-pool: internal
+    metallb.universe.tf/allow-shared-ip: unifi-controller
+spec:
+  loadBalancerIP: 172.16.30.2
+  type: LoadBalancer
+  ports:
+    - port: 3478
+      targetPort: stun
+      protocol: UDP
+      name: stun
+
+  selector:
+    name: unifi-controller
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unifi-controller
+  namespace: unifi-system
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: unifi-controller
+  template:
+    metadata:
+      labels:
+        name: unifi-controller
+    spec:
+      containers:
+        - name: unifi
+          image: "jacobalberty/unifi:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https-gui
+              containerPort: 8443
+              protocol: TCP
+            - name: controller
+              containerPort: 8080
+              protocol: TCP
+            - name: discovery
+              containerPort: 10001
+              protocol: UDP
+            - name: stun
+              containerPort: 3478
+              protocol: UDP
+          securityContext:
+            capabilities:
+              add:
+                - SETFCAP
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: https-gui
+              scheme: HTTPS
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: https-gui
+              scheme: HTTPS
+            initialDelaySeconds: 15
+          env:
+            - name: UNIFI_HTTP_PORT
+              value: "8080"
+            - name: UNIFI_HTTPS_PORT
+              value: "8443"
+            - name: TZ
+              value: "UTC"
+            - name: RUNAS_UID0
+              value: "false"
+            - name: UNIFI_UID
+              value: "999"
+            - name: UNIFI_GID
+              value: "999"
+          volumeMounts:
+            - mountPath: /unifi/data
+              name: unifi-data
+              subPath: data
+            - mountPath: /unifi/log
+              name: unifi-data
+              subPath: log
+            - mountPath: /unifi/cert
+              name: unifi-data
+              subPath: cert
+            - mountPath: /unifi/init.d
+              name: unifi-data
+              subPath: init.d
+          resources:
+            {}
+            
+      volumes:
+        - name: unifi-data
+          persistentVolumeClaim:
+            claimName: unifi-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-unifi-gui
+  namespace: unifi-system
+spec:
+  ports:
+    - name: https-gui
+      port: 443
+      protocol: TCP
+      targetPort: https-gui
+
+  selector:
+    name: unifi-controller
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-unifi
+  namespace: unifi-system
+  annotations:
+    acme.kubernetes.io/enable: "true"
+    acme.kubernetes.io/dns: "dns_gd"
+    ingress.kubernetes.io/secure-backends: "true"
+spec:
+  tls:
+  - hosts:
+    - unifi.internal.cloudninja.xyz
+    secretName: unifi-tls
+  rules:
+    - host: unifi.internal.cloudninja.xyz
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc-unifi-gui
+              servicePort: https-gui
+
