@@ -19,5 +19,5 @@ spec:
       - path: /haproxy/stats
         backend:
           serviceName: svc-haproxy-stats
-          servicePort: 1936
+          servicePort: stats
 
