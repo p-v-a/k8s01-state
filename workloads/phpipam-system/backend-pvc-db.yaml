@@ -1,0 +1,19 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: phpipam-mysql-data
+  namespace: phpipam-system
+
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-db
+
+spec:
+  storageClassName: gp1
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+

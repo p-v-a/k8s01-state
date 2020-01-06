@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: phpipam-db
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-db
+spec:
+  replicas: 1
+  serviceName: phpipam-db
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phpipam
+      app.kubernetes.io/component: phpipam-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: phpipam
+        app.kubernetes.io/component: phpipam-db
+    spec:
+      containers:
+      - image: mariadb:latest
+        imagePullPolicy: Always
+        name: phpipam-db
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 200m
+            memory: 500Mi
+        ports:
+        - name: mysql
+          containerPort: 3306
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: phpipam-mysql-data
+          readOnly: false
+        env:
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ipam-secret
+                key: mysqlPassword
+          - name: MYSQL_USER
+            valueFrom:
+              configMapKeyRef:
+                name: phpipam-env
+                key: IPAM_DATABASE_USER
+          - name: MYSQL_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: phpipam-env
+                key: IPAM_DATABASE_NAME
+          - name: MYSQL_RANDOM_ROOT_PASSWORD
+            value: "yes"
+
+        livenessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - exec mysqladmin ping -h 127.0.0.1 -u $MYSQL_USER -p$MYSQL_PASSWORD
+          initialDelaySeconds: 240
+          timeoutSeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - exec mysqladmin ping -h 127.0.0.1 -u $MYSQL_USER -p$MYSQL_PASSWORD
+          initialDelaySeconds: 240
+          timeoutSeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 5
+      volumes:
+      - name: phpipam-mysql-data
+        persistentVolumeClaim:
+          claimName: phpipam-mysql-data
+          readOnly: false

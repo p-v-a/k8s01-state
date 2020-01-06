@@ -1,0 +1,56 @@
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: phpipam-app
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-frontend
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: phpipam
+      app.kubernetes.io/component: phpipam-frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: phpipam
+        app.kubernetes.io/component: phpipam-frontend
+    spec:
+      containers:
+      - image: phpipam/phpipam-www:latest
+        imagePullPolicy: IfNotPresent
+        name: phpipam-app
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        readinessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: http
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        envFrom:
+        - configMapRef:
+            name: phpipam-env
+        env:
+          - name: IPAM_DATABASE_PASS
+            valueFrom:
+              secretKeyRef:
+                name: ipam-secret
+                key: mysqlPassword

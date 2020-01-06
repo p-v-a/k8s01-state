@@ -1,0 +1,35 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: phpipam-env
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+
+data:
+  IPAM_DATABASE_HOST: "phpipam-db"
+  IPAM_DATABASE_USER: "phpipam-user"
+  IPAM_DATABASE_NAME: "phpipam-db"
+#  Kubernetes can't reference secret from ConfigMap - https://github.com/kubernetes/kubernetes/issues/79224
+#  IPAM_DATABASE_PASS:
+#    valueFrom:
+#      secretKeyRef:
+#        name: ipam-sescret
+#        key: mysqlPassword
+
+  IPAM_MYSQL_BACKUP_ROTATION: "10"
+#  IPAM_DATABASE_WEBHOST: "%"
+
+  PROXY_ENABLED: "false"
+  PROXY_SERVER: "proxy.local"
+  PROXY_PORT: "8080"
+  PROXY_USE_AUTH: "false"
+  PROXY_USER: "proxy_user"
+
+#  PROXY_PASS:
+#    valueFrom:
+#    secretKeyRef:
+#      name: ipam-credentials
+#      key: proxyPassword
+
+  SCAN_INTERVAL: 10m

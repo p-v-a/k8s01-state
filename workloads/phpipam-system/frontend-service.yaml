@@ -1,0 +1,17 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: phpipam-frontend
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-frontend
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-frontend

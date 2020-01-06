@@ -1,0 +1,19 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: phpipam-db
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-db
+
+spec:
+  type: ClusterIP
+  ports:
+  - name: mysql-connect
+    port: 3306
+    targetPort: mysql
+  selector:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-db

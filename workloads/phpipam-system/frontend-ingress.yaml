@@ -1,0 +1,22 @@
+---
+kind: Ingress
+apiVersion: extensions/v1beta1
+metadata:
+  name: phpipam-ingress
+  namespace: phpipam-system
+  labels:
+    app.kubernetes.io/name: phpipam
+    app.kubernetes.io/component: phpipam-frontend
+spec:
+  tls:
+  - hosts:
+    - ipam.internal.cloudninja.xyz
+    secretName: phpipam-tls
+  rules:
+  - host: ipam.internal.cloudninja.xyz
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: phpipam-frontend
+          servicePort: http
