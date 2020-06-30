@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: system
+  name: metllb-controller
+  labels:
+    app.kubernetes.io/name: metallb
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: controller
+spec:
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metallb
+      app.kubernetes.io/instance: default
+      app.kubernetes.io/component: controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metallb
+        app.kubernetes.io/instance: default
+        app.kubernetes.io/component: controller
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7472"
+    spec:
+      serviceAccountName: controller
+      terminationGracePeriodSeconds: 0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # nobody
+
+      # schedule controller on control plane nodes
+      tolerations:
+      - key: "node-role.kubernetes.io/controlplane"
+        operator: Equal
+        value: "true"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/etcd"
+        operator: Equal
+        value: "true"
+        effect: "NoExecute"
+
+      nodeSelector:
+        "node-role.kubernetes.io/controlplane": "true"
+
+
+      containers:
+      - name: controller
+        image: metallb/controller:v0.7.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - --port=7472
+        - --config=metallb-config
+        ports:
+        - name: monitoring
+          containerPort: 7472
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
+          readOnlyRootFilesystem: true

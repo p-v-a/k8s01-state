@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: system
+  name: metallb-speaker
+  labels:
+    app.kubernetes.io/name: metallb
+    app.kubernetes.io/instance: default
+    app.kubernetes.io/component: speaker
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metallb
+      app.kubernetes.io/instance: default
+      app.kubernetes.io/component: speaker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metallb
+        app.kubernetes.io/instance: default
+        app.kubernetes.io/component: speaker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7472"
+    spec:
+      serviceAccountName: speaker
+      terminationGracePeriodSeconds: 0
+      hostNetwork: true
+
+      # allow scheduling of metallb speakers on control plane nodes
+      tolerations:
+      - key: "node-role.kubernetes.io/controlplane"
+        operator: Equal
+        value: "true"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/etcd"
+        operator: Equal
+        value: "true"
+        effect: "NoExecute"
+
+      nodeSelector:
+        "node-role.kubernetes.io/controlplane": "true"
+
+      containers:
+      - name: speaker
+        image: metallb/speaker:v0.8.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - --port=7472
+        - --config=metallb-config
+        env:
+        - name: METALLB_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - name: monitoring
+          containerPort: 7472
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - all
+            add:
+            - net_raw
+

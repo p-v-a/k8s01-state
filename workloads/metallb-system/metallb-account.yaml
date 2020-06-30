@@ -1,0 +1,116 @@
+# Source: https://raw.githubusercontent.com/google/metallb/v0.7.3/manifests/metallb.yaml
+# NOTE: When updating from source, change names that are namespace:name to be
+# just name otherwise it breaks flux.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: system
+  name: controller
+  labels:
+    app.kubernetes.io/name: metallb
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: system
+  name: speaker
+  labels:
+    app.kubernetes.io/name: metallb
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: system
+  name: metallb-system-controller
+  labels:
+    app.kubernetes.io/name: metallb
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["services/status"]
+  verbs: ["update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: system
+  name: metallb-system-speaker
+  labels:
+    app.kubernetes.io/name: metallb
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints", "nodes"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: system
+  name: config-watcher
+  labels:
+    app.kubernetes.io/name: metallb
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+---
+
+## Role bindings
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  namespace: system
+  name: controller
+  labels:
+    app.kubernetes.io/name: metallb
+subjects:
+- kind: ServiceAccount
+  name: controller
+  namespace: system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-system-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  namespace: system
+  name: speaker
+  labels:
+    app.kubernetes.io/name: metallb
+subjects:
+- kind: ServiceAccount
+  name: speaker
+  namespace: system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-system-speaker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: system
+  name: config-watcher
+  labels:
+    app.kubernetes.io/name: metallb
+subjects:
+- kind: ServiceAccount
+  name: controller
+- kind: ServiceAccount
+  name: speaker
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: config-watcher
