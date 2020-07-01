@@ -24,7 +24,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "7472"
     spec:
-      serviceAccountName: speaker
+      serviceAccountName: metallb-speaker
       terminationGracePeriodSeconds: 0
       hostNetwork: true
 
